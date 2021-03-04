@@ -1,19 +1,30 @@
 import java.net.InetSocketAddress;
-import java.util.Map;
+import java.util.HashMap;
 
 public class FingerTable {
 
-    private Map<String, InetSocketAddress> entries;
+    private HashMap<Integer, InetSocketAddress> fingerTable;
 
-    public InetSocketAddress getFingerEntry(String nodeId) {
-        return entries.get(nodeId);
+    FingerTable() {
+        fingerTable = new HashMap<Integer, InetSocketAddress>();
+        for(int i = 1; i <= 32;  i++) {
+            updateFingerTable(i, null);
+        }
     }
 
-    public void updateFingerTable(String nodeId, InetSocketAddress socketAddress) {
-        entries.put(nodeId, socketAddress);
+    public InetSocketAddress getFingerEntry(Integer i) {
+        return fingerTable.get(i);
     }
 
-    public void deleteFingerEntry(String nodeId) {
-        entries.remove(nodeId);
+    public void updateFingerTable(Integer i, InetSocketAddress socketAddress) {
+        fingerTable.put(i, socketAddress);
+    }
+
+    public void deleteFingerEntry(InetSocketAddress address) {
+        for (int i = 32; i > 0; i--) {
+            InetSocketAddress fingerAddress = fingerTable.get(i);
+            if(fingerAddress == address)
+                fingerTable.put(i, null);
+        }
     }
 }

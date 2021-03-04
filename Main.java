@@ -1,5 +1,3 @@
-import java.io.*;
-import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.Scanner;
@@ -21,50 +19,58 @@ public class Main {
             System.out.println();
             System.out.println("Enter anyone of the following options:");
             System.out.println("create, join, delete, list, getkey, quit");
+            System.out.println();
 
             option = input.nextLine();
             System.out.println("Entered option : " + option);
 
             if (option.equals("create")) {
-                System.out.println("Create");
 
                 //port number
                 System.out.println("Enter the port number for creating node:");
-//                System.out.println(input.nextInt());
+                System.out.println();
+
                 int port = input.nextInt();
-                if(Auxiliary.create(port)) {
+                if(Commands.create(port)) {
                     System.out.println("Chord ring created successfully");
                 } else {
                     System.out.println("Could not create chord ring");
                 }
 
             } else if (option.equals("join")) {
-                System.out.println("Join");
+
 
             } else if (option.equals("delete")) {
-                System.out.println("Delete");
+
                 System.out.println("Enter the port number for deleting node:");
+                System.out.println();
                 int port = input.nextInt();
-                Auxiliary.delete(port);
+                Commands.delete(port);
 
             } else if (option.equals("list")) {
-                System.out.println("Listing nodes");
 
-                for(Node node: Auxiliary.list())
+                System.out.println("Listing nodes");
+                for(Node node: Commands.list())
                 {
                     System.out.println(node.getNodeId() + ":" + node.getPort() + ":" + node.getFingerTable());
                 }
             }
             else if (option.equals("getkey")) {
-                System.out.println("getKey");
+
                 System.out.println("Enter the port number to search key :");
+                System.out.println();
                 int port = input.nextInt();
                 System.out.println("Enter the key:");
+                System.out.println();
                 int key = input.nextInt();
-                Auxiliary.getKey(port, key);
+                Commands.getKey(port, key);
 
             } else if (option.equals("quit")) {
                 System.out.println("Ending the program..");
+                for(Node node: Commands.list())
+                {
+                    Commands.delete(node.getPort());
+                }
                 break;
             } else {
                 System.out.println("Entered wrong option, please try again.");
@@ -74,5 +80,6 @@ public class Main {
             System.out.println("--------------------------------------------------------");
         }
 
+        System.out.println("Ended program..");
     }
 }

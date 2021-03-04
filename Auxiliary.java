@@ -1,85 +1,81 @@
-import java.io.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Collection;
-import java.util.List;
 
 public class Auxiliary {
 
-    Node node;
-
-    public static boolean create(int port) throws NoSuchAlgorithmException {
-        //create socketaddress
-        InetSocketAddress socketAddress = new InetSocketAddress(port);
+    public static BigInteger getHashAddress(InetSocketAddress socketAddress) throws NoSuchAlgorithmException {
+        System.out.println("Socket Address is: " + socketAddress);
         MessageDigest md = MessageDigest.getInstance("SHA-1");
         byte[] messageDigest = md.digest(BigInteger.valueOf(socketAddress.hashCode()).toByteArray());
-        BigInteger no = new BigInteger(1, messageDigest);
-
-        //create node and related
-        Node node = Node.builder().socketAddress(socketAddress).port(port).nodeId(no).build();
-
-        //Start Listener
-        Listener listener = new Listener(node);
-        node.setListener(listener);
-        listener.start();
-
-        Main.masterLookup.put(port, node);
-
-        return true;
+        BigInteger num = new BigInteger(1, messageDigest);
+        return num;
     }
 
-    public static boolean delete(int port) {
-
-        Node node = Main.masterLookup.get(port);
-        node.getListener().stopListner();
-        Main.masterLookup.remove(port);
-        return true;
+    public static BigInteger getHashKey(int key) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("SHA-1");
+        byte[] messageDigest = md.digest(BigInteger.valueOf(key).toByteArray());
+        BigInteger num = new BigInteger(1, messageDigest);
+        return num;
     }
 
-    public static Collection<Node> list() {
-        return Main.masterLookup.values();
+    public static BigInteger getRelativeId(BigInteger a, BigInteger b) {
+        BigInteger c = a.subtract(b);
+        if(c.compareTo(BigInteger.ZERO) < 0) {
+            c = c.add(BigDecimal.valueOf(Math.pow(2, 32)).toBigInteger());
+        }
+        return c;
     }
 
-    public static void getKey(int port, int key) throws ClassNotFoundException {
+    public static String sendRequest(InetSocketAddress server, String request) throws ClassNotFoundException {
 
-        try (Socket socket = new Socket("127.0.0.1", port)) {
+        String response = null;
 
-//            OutputStream output = socket.getOutputStream();
-//            PrintWriter writer = new PrintWriter(output, true);
-//            writer.println(key);
-//            InputStream input = socket.getInputStream();
-//            BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-
-//            String time = reader.readLine();
-//            System.out.println(time);
-
-
+        try (Socket socket = new Socket("127.0.0.1", server.getPort())) {
             ObjectOutputStream oos = null;
             ObjectInputStream ois = null;
             //write to socket using ObjectOutputStream
             oos = new ObjectOutputStream(socket.getOutputStream());
             System.out.println("Sending request to Socket Server");
-            oos.writeObject(String.valueOf(key));
+            oos.writeObject(request);
             //read the server response message
             ois = new ObjectInputStream(socket.getInputStream());
-            String message = (String) ois.readObject();
-            System.out.println("Message: " + message);
+            response = (String) ois.readObject();
+            System.out.println("Response: " + response);
             //close resources
             ois.close();
             oos.close();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
+        return response;
+    }
 
-        } catch (UnknownHostException ex) {
+    public static InetSocketAddress requestAddress(InetSocketAddress server, String request) throws ClassNotFoundException {
 
-            System.out.println("Server not found: " + ex.getMessage());
+        System.out.println("Entered requestAddress");
+        String response = null;
 
-        } catch (IOException ex) {
+        response = sendRequest(server, request);
 
-            System.out.println("I/O error: " + ex.getMessage());
+        if (response == null) {
+            return null;
+        } else if (response.startsWith("NOTHING")) {
+            return server;
+        } else {
+            InetSocketAddress ret =  new InetSocketAddress(Integer.parseInt(response));
+            return ret;
         }
     }
+
 }
