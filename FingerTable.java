@@ -8,7 +8,7 @@ public class FingerTable {
     FingerTable() {
         fingerTable = new HashMap<Integer, InetSocketAddress>();
         for(int i = 1; i <= 32;  i++) {
-            updateFingerTable(i, null);
+            updateFingerEntry(i, null);
         }
     }
 
@@ -16,15 +16,27 @@ public class FingerTable {
         return fingerTable.get(i);
     }
 
-    public void updateFingerTable(Integer i, InetSocketAddress socketAddress) {
+    public void updateFingerEntry(Integer i, InetSocketAddress socketAddress) {
         fingerTable.put(i, socketAddress);
+
     }
 
     public void deleteFingerEntry(InetSocketAddress address) {
         for (int i = 32; i > 0; i--) {
             InetSocketAddress fingerAddress = fingerTable.get(i);
-            if(fingerAddress == address)
+            if(fingerAddress.equals(address))
                 fingerTable.put(i, null);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "FingerTable{" +
+                "fingerTable=" + fingerTable +
+                '}';
+    }
+
+    public int size() {
+        return fingerTable.size();
     }
 }

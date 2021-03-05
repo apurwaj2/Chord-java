@@ -14,7 +14,6 @@ public class Listener implements Runnable {
     private ServerSocket server;
     private AtomicBoolean keepAlive;
     private Thread worker;
-    private int interval;
 
 
     public void start() {
@@ -39,7 +38,8 @@ public class Listener implements Runnable {
 
     private String processRequest (String request) throws ClassNotFoundException, NoSuchAlgorithmException {
 
-        System.out.println("Processing the request : " + request);
+        if(!request.startsWith("KEEP"))
+        System.out.println("Processing the request at : " + node.getPort() + " -> " + request);
 
         InetSocketAddress result = null;
         String ret = null;
@@ -48,7 +48,7 @@ public class Listener implements Runnable {
         }
         if (request.startsWith("CLOSEST-FINGER")) {
             String[] s = request.split("_");
-            BigInteger id = new BigInteger(s[1], 16);
+            long id = Long.parseLong(s[1]);
             result = node.closest_preceding_finger(id);
             int port = result.getPort();
             ret = String.valueOf(port);
@@ -74,7 +74,7 @@ public class Listener implements Runnable {
             }
         } else if (request.startsWith("FIND-SUCCESSOR")) {
             String[] s = request.split("_");
-            BigInteger id = new BigInteger(s[1], 16);
+            long id = Long.parseLong(s[1]);
             result = node.findSuccessor(id);
             int port = result.getPort();
             ret = String.valueOf(port);
@@ -83,9 +83,11 @@ public class Listener implements Runnable {
             String[] s = request.split("_");
             int port = Integer.parseInt(s[1]);
             InetSocketAddress new_pre = new InetSocketAddress(port);
-           // node.notifySuccessor(new_pre);
+//            node.notifySuccessor(new_pre);
+            node.handleNotification(new_pre);
             ret = "NOTIFIED";
         } else if (request.startsWith("KEEP")) {
+//            System.out.println("KEEP ALIVE " + node.getPort());
             ret = "ALIVE";
         }
         return ret;
@@ -100,7 +102,7 @@ public class Listener implements Runnable {
                 Socket clientSocket = server.accept();
                 ObjectInputStream ois = new ObjectInputStream(clientSocket.getInputStream());
                 String request = (String) ois.readObject();
-                System.out.println("Message Received on port: " + node.getPort() + "\n request: " + request);
+//                System.out.println("Message Received on port: " + node.getPort() + "\n request: " + request);
 
                 //Send response
                 String response = processRequest(request);

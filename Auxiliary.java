@@ -6,30 +6,50 @@ import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 public class Auxiliary {
 
-    public static BigInteger getHashAddress(InetSocketAddress socketAddress) throws NoSuchAlgorithmException {
-        System.out.println("Socket Address is: " + socketAddress);
-        MessageDigest md = MessageDigest.getInstance("SHA-1");
-        byte[] messageDigest = md.digest(BigInteger.valueOf(socketAddress.hashCode()).toByteArray());
-        BigInteger num = new BigInteger(1, messageDigest);
-        return num;
+    public static long toLong(byte[] b) {
+        ByteBuffer bb = ByteBuffer.allocate(b.length);
+        bb.put(b);
+        return bb.getLong();
     }
 
-    public static BigInteger getHashKey(int key) throws NoSuchAlgorithmException {
+    public static long getFingerId(long nodeID, int i, int m) {
+        long a = (long)Math.pow(2, i-1);
+        long b = (long)Math.pow(2,m);
+        long value = (nodeID + a) % b;
+
+        return value;
+    }
+
+    public static long getHashAddress(InetSocketAddress socketAddress) throws NoSuchAlgorithmException {
+       // System.out.println("Socket Address is: " + socketAddress);
+        if(socketAddress != null) {
+            MessageDigest md = MessageDigest.getInstance("SHA-1");
+            byte[] messageDigest = md.digest(BigInteger.valueOf(socketAddress.hashCode()).toByteArray());
+//            long num = toLong(messageDigest);
+           // BigInteger num = new BigInteger(1, messageDigest);
+            return socketAddress.getPort();
+        }
+
+        return 0;
+    }
+
+    public static long getHashKey(int key) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance("SHA-1");
         byte[] messageDigest = md.digest(BigInteger.valueOf(key).toByteArray());
-        BigInteger num = new BigInteger(1, messageDigest);
-        return num;
+//        long num = toLong(messageDigest);
+        return key;
     }
 
-    public static BigInteger getRelativeId(BigInteger a, BigInteger b) {
-        BigInteger c = a.subtract(b);
-        if(c.compareTo(BigInteger.ZERO) < 0) {
-            c = c.add(BigDecimal.valueOf(Math.pow(2, 32)).toBigInteger());
+    public static long getRelativeId(long a, long b) {
+        long c = a-b;
+        if(c < 0) {
+            c = c + (long)Math.pow(2, 32);
         }
         return c;
     }
@@ -43,12 +63,12 @@ public class Auxiliary {
             ObjectInputStream ois = null;
             //write to socket using ObjectOutputStream
             oos = new ObjectOutputStream(socket.getOutputStream());
-            System.out.println("Sending request to Socket Server");
+          //  System.out.println("Sending request to Socket Server");
             oos.writeObject(request);
             //read the server response message
             ois = new ObjectInputStream(socket.getInputStream());
             response = (String) ois.readObject();
-            System.out.println("Response: " + response);
+          //  System.out.println("Response: " + response);
             //close resources
             ois.close();
             oos.close();
@@ -63,7 +83,8 @@ public class Auxiliary {
 
     public static InetSocketAddress requestAddress(InetSocketAddress server, String request) throws ClassNotFoundException {
 
-        System.out.println("Entered requestAddress");
+      //
+        //  System.out.println("Entered requestAddress");
         String response = null;
 
         response = sendRequest(server, request);

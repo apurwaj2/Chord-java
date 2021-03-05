@@ -39,6 +39,17 @@ public class Main {
 
             } else if (option.equals("join")) {
 
+                System.out.println("Enter the port number for joining node:");
+                System.out.println();
+                int port1 = input.nextInt();
+
+                System.out.println("Enter the port number of the node to join the ring:");
+                System.out.println();
+                int port2 = input.nextInt();
+
+                Commands.create(port1);
+                Node n = masterLookup.get(port1);
+                Commands.join(n, port2);
 
             } else if (option.equals("delete")) {
 
@@ -52,7 +63,10 @@ public class Main {
                 System.out.println("Listing nodes");
                 for(Node node: Commands.list())
                 {
-                    System.out.println(node.getNodeId() + ":" + node.getPort() + ":" + node.getFingerTable());
+                    System.out.println(node.getNodeId() + " : " + node.getPort());
+                    System.out.println("Predecessor: " + node.getPredecessor());
+                    System.out.println("Successor: " + node.getSuccessor());
+                    System.out.println("Finger Table: " + node.getFingerTable());
                 }
             }
             else if (option.equals("getkey")) {
@@ -71,7 +85,7 @@ public class Main {
                 {
                     Commands.delete(node.getPort());
                 }
-                break;
+                System.exit(0);
             } else {
                 System.out.println("Entered wrong option, please try again.");
             }
@@ -80,6 +94,5 @@ public class Main {
             System.out.println("--------------------------------------------------------");
         }
 
-        System.out.println("Ended program..");
     }
 }

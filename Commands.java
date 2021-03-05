@@ -12,7 +12,7 @@ public class Commands {
     public static boolean create(int port) throws NoSuchAlgorithmException {
         //create socketaddress
         InetSocketAddress socketAddress = new InetSocketAddress(port);
-        BigInteger id = Auxiliary.getHashAddress(socketAddress);
+        long id = Auxiliary.getHashAddress(socketAddress);
 
         //create node and related
         node = Node.builder().socketAddress(socketAddress).port(port).nodeId(id).fingerTable(new FingerTable()).build();
@@ -22,11 +22,44 @@ public class Commands {
         node.setListener(listener);
         listener.start();
 
+        //Start FixFingers
+        FixFingers fixFingers = new FixFingers(node);
+        node.setFixFingers(fixFingers);
+        fixFingers.start();
+
+        //Start Stabilize
+        Stabilize stabilize = new Stabilize(node);
+        node.setStabilize(stabilize);
+        stabilize.start();
+
+        //Start CheckPredecessor
+        CheckPredecessor checkPredecessor = new CheckPredecessor(node);
+        node.setCheckPredecessor(checkPredecessor);
+        checkPredecessor.start();
+
         //set successor and predecessor
         node.setPredecessor(null);
-        node.setSuccessor(socketAddress);
 
         Main.masterLookup.put(port, node);
+
+        return true;
+    }
+
+    public static boolean join(Node node, int portMain) throws NoSuchAlgorithmException, ClassNotFoundException {
+
+        // Trying to join an existing ring
+        InetSocketAddress address = new InetSocketAddress(portMain);
+        String id = String.valueOf(node.getNodeId());
+        System.out.println("Join node hash id value is : " + id);
+        String request = "FIND-SUCCESSOR_" + id;
+        InetSocketAddress successor = Auxiliary.requestAddress(address, request);
+        if(successor == null) {
+            System.out.println("Cannot find the node to join the ring");
+            return false;
+        }
+
+        node.updateFingerTable(1, successor);
+
 
         return true;
     }
@@ -35,6 +68,9 @@ public class Commands {
 
         Node node = Main.masterLookup.get(port);
         node.getListener().stop();
+        node.getCheckPredecessor().stopThread();
+        node.getFixFingers().stopThread();
+        node.getStabilize().stopThread();
         Main.masterLookup.remove(port);
         return true;
     }
@@ -45,8 +81,8 @@ public class Commands {
 
     public static void getKey(int port, int key) throws ClassNotFoundException, NoSuchAlgorithmException {
 
-        BigInteger keyId = Auxiliary.getHashKey(key);
-        String keyHash =  keyId.toString(16);
+        long keyId = Auxiliary.getHashKey(key);
+        String keyHash =  String.valueOf(keyId);
 
         System.out.println("Hash value is : " + keyHash);
 

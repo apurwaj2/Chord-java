@@ -7,7 +7,7 @@ import java.security.NoSuchAlgorithmException;
 
 @Builder
 public class Node {
-    private BigInteger nodeId;
+    private long nodeId;
     private int port;
     private InetSocketAddress socketAddress;
     private InetSocketAddress predecessor;
@@ -15,8 +15,11 @@ public class Node {
     private FingerTable fingerTable;
 
     private Listener listener;
+    private FixFingers fixFingers;
+    private Stabilize stabilize;
+    private CheckPredecessor checkPredecessor;
 
-    public void setNodeId(BigInteger nodeId) {
+    public void setNodeId(long nodeId) {
         this.nodeId = nodeId;
     }
 
@@ -29,6 +32,7 @@ public class Node {
     }
 
     public void setPredecessor(InetSocketAddress predecessor) {
+        System.out.println("setting predecessor of " + this.port + ":" + ((predecessor==null)? " ":predecessor.getPort()));
         this.predecessor = predecessor;
     }
 
@@ -40,7 +44,7 @@ public class Node {
         this.listener = listener;
     }
 
-    public BigInteger getNodeId() {
+    public long getNodeId() {
         return nodeId;
     }
 
@@ -57,11 +61,38 @@ public class Node {
     }
 
     public InetSocketAddress getSuccessor() {
-        return successor;
+        if (fingerTable != null && fingerTable.size() > 0) {
+            return fingerTable.getFingerEntry(1);
+        }
+        return null;
     }
 
     public Listener getListener() {
         return listener;
+    }
+
+    public FixFingers getFixFingers() {
+        return fixFingers;
+    }
+
+    public void setFixFingers(FixFingers fixFingers) {
+        this.fixFingers = fixFingers;
+    }
+
+    public Stabilize getStabilize() {
+        return stabilize;
+    }
+
+    public void setStabilize(Stabilize stabilize) {
+        this.stabilize = stabilize;
+    }
+
+    public CheckPredecessor getCheckPredecessor() {
+        return checkPredecessor;
+    }
+
+    public void setCheckPredecessor(CheckPredecessor checkPredecessor) {
+        this.checkPredecessor = checkPredecessor;
     }
 
     public FingerTable getFingerTable() {
@@ -72,38 +103,39 @@ public class Node {
         this.fingerTable = fingerTable;
     }
 
-    public InetSocketAddress findSuccessor(BigInteger keyId) throws NoSuchAlgorithmException, ClassNotFoundException {
+    public InetSocketAddress findSuccessor(long keyId) throws NoSuchAlgorithmException, ClassNotFoundException {
 
-        System.out.println("Inside FindSuccessor");
-        InetSocketAddress  successor = getSuccessor();
+      //  System.out.println("Inside FindSuccessor");
+        InetSocketAddress  succ = getSuccessor();
 
         //find the predecessor of the keyId
-        InetSocketAddress predecessor = findPredecessor(keyId);
-        if(predecessor != getSocketAddress()) {
-            successor = Auxiliary.requestAddress(predecessor, "GET-SUCCESSOR");
+        InetSocketAddress pred = findPredecessor(keyId);
+        if(!pred.equals(getSocketAddress())) {
+            succ = Auxiliary.requestAddress(pred, "GET-SUCCESSOR");
         }
         // no other node is present
-        if(successor == null) {
-            successor = getSocketAddress();
+        if(succ == null) {
+            succ = getSocketAddress();
         }
 
-        return successor;
+        return succ;
     }
 
-    public InetSocketAddress closest_preceding_finger(BigInteger keyId) throws NoSuchAlgorithmException, ClassNotFoundException {
+    public InetSocketAddress closest_preceding_finger(long keyId) throws NoSuchAlgorithmException, ClassNotFoundException {
 
-        BigInteger relativeKeyId = Auxiliary.getRelativeId(keyId, nodeId);
+        long relativeKeyId = Auxiliary.getRelativeId(keyId, nodeId);
 
         for(int i = 32; i > 0; i--) {
             InetSocketAddress fingerAddress = fingerTable.getFingerEntry(i);
             if(fingerAddress == null)
                 continue;
 
-            BigInteger fingerId = Auxiliary.getHashAddress(fingerAddress);
-            BigInteger relativeFingerId = Auxiliary.getRelativeId(fingerId, nodeId);
+            long fingerId = Auxiliary.getHashAddress(fingerAddress);
+            long relativeFingerId = Auxiliary.getRelativeId(fingerId, nodeId);
 
             //relativeFingerId > 0 && relativeFingerId < relativeKeyId
-            if (relativeFingerId.compareTo(BigInteger.ZERO) > 0 && relativeFingerId.compareTo(relativeKeyId) < 0)  {
+            if (relativeFingerId > 0 && relativeFingerId <relativeKeyId)  {
+//                System.out.println("hello..................................................");
                 String response  = Auxiliary.sendRequest(fingerAddress, "KEEP");
                 if (response!=null &&  response.equals("ALIVE")) {
                     return fingerAddress;
@@ -119,29 +151,30 @@ public class Node {
         return socketAddress;
     }
 
-    public InetSocketAddress findPredecessor(BigInteger keyId) throws NoSuchAlgorithmException, ClassNotFoundException {
+    public InetSocketAddress findPredecessor(long keyId) throws NoSuchAlgorithmException, ClassNotFoundException {
 
-        System.out.println("Entered findPredecessor");
+       // System.out.println("Entered findPredecessor");
 
-        InetSocketAddress n = getSocketAddress();
+        InetSocketAddress n = socketAddress;
         InetSocketAddress nSuccessor = getSuccessor();
-        BigInteger relative_successor_id = Auxiliary.getRelativeId(Auxiliary.getHashAddress(nSuccessor), nodeId);
-        BigInteger relative_key_id = Auxiliary.getRelativeId(keyId, nodeId);
+        long relative_successor_id = Auxiliary.getRelativeId(Auxiliary.getHashAddress(nSuccessor), nodeId);
+        long relative_key_id = Auxiliary.getRelativeId(keyId, nodeId);
         InetSocketAddress most_recently_alive = n;
 
 
-        System.out.println("relative_key_id " + relative_key_id);
-        System.out.println("relative_successor_id " + relative_successor_id);
+//        System.out.println("relative_key_id " + relative_key_id);
+//        System.out.println("relative_successor_id " + relative_successor_id);
 
         //check this condition properly
-        while(!(relative_key_id.compareTo(BigInteger.ZERO) > 0 && relative_successor_id.compareTo(relative_key_id) > 0)) {
+        while(!(relative_key_id > 0 && relative_key_id <= relative_successor_id)) {
 
             InetSocketAddress current = n;
 
-            if(n == getSocketAddress()) {
+            if(n.equals(getSocketAddress())) {
                 n = closest_preceding_finger(keyId);
             } else {
-                String key = new String(keyId.toByteArray());
+//                System.out.printl!=n("inside while");
+                String key = String.valueOf(keyId);
                 String request = "CLOSEST-FINGER_" + key;
                 InetSocketAddress result = Auxiliary.requestAddress(n, request);
 
@@ -157,7 +190,7 @@ public class Node {
                 }
 
                 // if n's closest is itself, return n
-            else if (result == n)
+            else if (result.equals(n))
                     return result;
 
                     // else n's closest is other node "result"
@@ -178,12 +211,127 @@ public class Node {
 
             }
 
-            if(current == n)
+            if(current.equals(n))
                 break;
 
         }
 
         return n;
+    }
+
+    public String notifySuccessor(InetSocketAddress S) throws ClassNotFoundException {
+        if (S != null && !S.equals(getSocketAddress())) {
+            String port = String.valueOf(getPort());
+            String request = "TELL-SUCCESSOR_" + port;
+            return Auxiliary.sendRequest(S, request);
+        } else {
+            return null;
+        }
+    }
+
+
+    public void handleNotification (InetSocketAddress newPredecessor) throws NoSuchAlgorithmException {
+        System.out.println("handle notification : " + getPort() + " -> " + (newPredecessor==null?" ":newPredecessor.getPort()));
+        if (getPredecessor() == null) {
+            setPredecessor(newPredecessor);
+        }
+        else {
+            long oldPredecessor = Auxiliary.getHashAddress(getPredecessor());
+            long oldPredecessorRelativeId = Auxiliary.getRelativeId(nodeId, oldPredecessor);
+            long newPredecessorRelativeId = Auxiliary.getRelativeId(Auxiliary.getHashAddress(newPredecessor), oldPredecessor);
+            System.out.println("newrelative " + newPredecessorRelativeId + " oldrelative " + oldPredecessorRelativeId);
+            if (newPredecessorRelativeId > 0 && newPredecessorRelativeId < oldPredecessorRelativeId)
+                setPredecessor(newPredecessor);
+            else {
+                System.out.println("Failed to set predecessor");
+            }
+        }
+    }
+
+    public void fillSuccessor() throws ClassNotFoundException {
+        InetSocketAddress succ = getSuccessor();
+        if (succ == null || succ.equals(socketAddress)) {
+            for (int i = 2; i <= 32; i++) {
+                InetSocketAddress fingerId = fingerTable.getFingerEntry(i);
+                if (fingerId != null && !fingerId.equals(socketAddress)) {
+                    for (int j = i-1; j >=1; j--) {
+                        updateFingerTable(j, fingerId);
+                    }
+                    break;
+                }
+            }
+        }
+
+        if ((succ == null || succ.equals(socketAddress)) &&
+        predecessor != null && !predecessor.equals(socketAddress)) {
+            updateFingerTable(1, predecessor);
+        }
+    }
+
+    public void deleteSuccessor() throws ClassNotFoundException {
+
+        // Already null
+        InetSocketAddress succ = getSuccessor();
+        if (succ == null)
+            return;
+
+        // get last entry of successor
+        int i = 32;
+        for (i = 32; i > 0; i--) {
+            InetSocketAddress fingerId = fingerTable.getFingerEntry(i);
+            if (fingerId != null && fingerId.equals(succ))
+                break;
+        }
+
+        // delete it
+        for (int j = i; j >= 1 ; j--) {
+            updateFingerTable(j, null);
+        }
+
+        // if predecessor is successor, delete it
+        if (predecessor!= null && predecessor.equals(succ)) {
+            setPredecessor(null);
+        }
+        // try to fill successor
+        fillSuccessor();
+
+        // if successor is still null or local node,
+        // and the predecessor is another node, keep asking
+        // it's predecessor until find local node's new successor
+        if ((succ == null || succ.equals(getSuccessor())) &&
+            predecessor != null && !predecessor.equals(socketAddress)) {
+
+            InetSocketAddress p = predecessor;
+            InetSocketAddress p_pre = null;
+            while (true) {
+                p_pre = Auxiliary.requestAddress(p, "GET-PREDECESSOR");
+                if (p_pre == null)
+                    break;
+
+                // if p's predecessor is node is just deleted,
+                // or itself (nothing found in p), or local address,
+                // p is current node's new successor, break
+                if (p_pre.equals(p) || p_pre.equals(socketAddress) || p_pre.equals(succ)) {
+                    break;
+                }
+
+                // else, keep asking
+                else {
+                    p = p_pre;
+                }
+            }
+
+            // update successor
+            updateFingerTable(1, p);
+        }
+    }
+
+    public void updateFingerTable(int i, InetSocketAddress address) throws ClassNotFoundException {
+        fingerTable.updateFingerEntry(i, address);
+
+        if (i == 1 && address != null && !socketAddress.equals(address)) {
+            notifySuccessor(address);
+        }
     }
 
 }
