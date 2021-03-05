@@ -103,11 +103,9 @@ public class Listener implements Runnable {
             String[] s = request.split("_");
             int port = Integer.parseInt(s[1]);
             InetSocketAddress new_pre = new InetSocketAddress(port);
-//            node.notifySuccessor(new_pre);
             node.handleNotification(new_pre);
             ret = "NOTIFIED";
         } else if (request.startsWith("KEEP")) {
-//            System.out.println("KEEP ALIVE " + node.getPort());
             ret = "ALIVE";
         }
 

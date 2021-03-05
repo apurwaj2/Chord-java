@@ -34,7 +34,8 @@ public class Stabilize implements Runnable {
                 node.fillSuccessor();
             }
 
-            successor = node.getSocketAddress();
+
+            successor = node.getSuccessor();
             if (successor != null && !successor.equals(node.getSocketAddress())) {
 
                 // get predecessor
@@ -54,6 +55,7 @@ public class Stabilize implements Runnable {
 
                 // else if successor's predecessor is not itself
                 else if (!x.equals(successor)) {
+//                    System.out.println("REached HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                     long successorRelativeId = 0;
                     try {
                         successorRelativeId = Auxiliary.getRelativeId(Auxiliary.getHashAddress(successor), node.getNodeId());
@@ -81,7 +83,7 @@ public class Stabilize implements Runnable {
             }
 
             try {
-                sleep(400);
+                sleep(240);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

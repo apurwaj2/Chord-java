@@ -15,7 +15,8 @@ public class Commands {
         long id = Auxiliary.getHashAddress(socketAddress);
 
         //create node and related
-        node = Node.builder().socketAddress(socketAddress).port(port).nodeId(id).fingerTable(new FingerTable()).build();
+        FingerTable ft = new FingerTable();
+        node = new Node(port, socketAddress, id, ft);
 
         //Start Listener
         Listener listener = new Listener(node);
@@ -45,7 +46,7 @@ public class Commands {
         return true;
     }
 
-    public static boolean join(Node node, int portMain) throws NoSuchAlgorithmException, ClassNotFoundException {
+    public static void join(Node node, int portMain) throws NoSuchAlgorithmException, ClassNotFoundException {
 
         // Trying to join an existing ring
         InetSocketAddress address = new InetSocketAddress(portMain);
@@ -55,16 +56,15 @@ public class Commands {
         InetSocketAddress successor = Auxiliary.requestAddress(address, request);
         if(successor == null) {
             System.out.println("Cannot find the node to join the ring");
-            return false;
+            return;
         }
 
         node.updateFingerTable(1, successor);
 
 
-        return true;
     }
 
-    public static boolean delete(int port) {
+    public static void delete(int port) {
 
         Node node = Main.masterLookup.get(port);
         node.getListener().stop();
@@ -72,7 +72,6 @@ public class Commands {
         node.getFixFingers().stopThread();
         node.getStabilize().stopThread();
         Main.masterLookup.remove(port);
-        return true;
     }
 
     public static Collection<Node> list() {

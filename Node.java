@@ -5,7 +5,6 @@ import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
 
 
-@Builder
 public class Node {
     private long nodeId;
     private int port;
@@ -34,10 +33,6 @@ public class Node {
     public void setPredecessor(InetSocketAddress predecessor) {
         System.out.println("setting predecessor of " + this.port + ":" + ((predecessor==null)? " ":predecessor.getPort()));
         this.predecessor = predecessor;
-    }
-
-    public void setSuccessor(InetSocketAddress successor) {
-        this.successor = successor;
     }
 
     public void setListener(Listener listener) {
@@ -101,6 +96,13 @@ public class Node {
 
     public void setFingerTable(FingerTable fingerTable) {
         this.fingerTable = fingerTable;
+    }
+
+    Node(int p, InetSocketAddress address, long id, FingerTable ft) {
+        setPort(p);
+        setNodeId(id);
+        setSocketAddress(address);
+        setFingerTable(ft);
     }
 
     public InetSocketAddress findSuccessor(long keyId) throws NoSuchAlgorithmException, ClassNotFoundException {
@@ -254,7 +256,7 @@ public class Node {
             for (int i = 2; i <= 32; i++) {
                 InetSocketAddress fingerId = fingerTable.getFingerEntry(i);
                 if (fingerId != null && !fingerId.equals(socketAddress)) {
-                    for (int j = i-1; j >=1; j--) {
+                    for (int j = i-1; j >= 1; j--) {
                         updateFingerTable(j, fingerId);
                     }
                     break;
@@ -262,6 +264,7 @@ public class Node {
             }
         }
 
+        //Setting predecessor as successor -> just two nodes
         if ((succ == null || succ.equals(socketAddress)) &&
         predecessor != null && !predecessor.equals(socketAddress)) {
             updateFingerTable(1, predecessor);
