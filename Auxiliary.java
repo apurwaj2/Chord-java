@@ -12,15 +12,24 @@ import java.security.NoSuchAlgorithmException;
 
 public class Auxiliary {
 
-    public static long toLong(byte[] b) {
-        ByteBuffer bb = ByteBuffer.allocate(b.length);
-        bb.put(b);
-        return bb.getLong();
+    public static long powerN(
+            int number,
+            int power
+    ) {
+        if(power == 0) return 1;
+        int result = number;
+
+        while(power > 1) {
+            result*=number;
+            power--;
+        }
+
+        return (long)result;
     }
 
     public static long getFingerId(long nodeID, int i, int m) {
-        long a = (long)Math.pow(2, i-1);
-        long b = (long)Math.pow(2,m);
+        long a = powerN(2, i-1);
+        long b = 8589934592L;
         long value = (nodeID + a) % b;
 
         return value;
@@ -49,7 +58,7 @@ public class Auxiliary {
     public static long getRelativeId(long a, long b) {
         long c = a-b;
         if(c < 0) {
-            c = c + (long)Math.pow(2, 32);
+            c = c + 8589934592L;
         }
         return c;
     }

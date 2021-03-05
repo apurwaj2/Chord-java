@@ -7,6 +7,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 public class Listener implements Runnable {
 
@@ -14,7 +17,8 @@ public class Listener implements Runnable {
     private ServerSocket server;
     private AtomicBoolean keepAlive;
     private Thread worker;
-
+    Logger logger = Logger.getLogger("MyLog");
+    FileHandler fh;
 
     public void start() {
         worker = new Thread(this);
@@ -34,12 +38,28 @@ public class Listener implements Runnable {
             System.err.println("Could not listen on port " + node.getPort());
         }
 
+        try {
+
+            // This block configure the logger with handler and formatter
+            fh = new FileHandler("/home/apurwa/IdeaProjects/ImplementationChord/MyLogFile.log");
+            logger.addHandler(fh);
+            SimpleFormatter formatter = new SimpleFormatter();
+            fh.setFormatter(formatter);
+            logger.setUseParentHandlers(false);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    private String processRequest (String request) throws ClassNotFoundException, NoSuchAlgorithmException {
+
+        private String processRequest (String request) throws ClassNotFoundException, NoSuchAlgorithmException {
+
+        if(request.startsWith("FIND") || request.startsWith("TELL"))
+        System.out.println("Processing the request at : " + node.getPort() + " -> " + request);
 
         if(!request.startsWith("KEEP"))
-        System.out.println("Processing the request at : " + node.getPort() + " -> " + request);
+        logger.info("Processing the request at : " + node.getPort() + " -> " + request);
 
         InetSocketAddress result = null;
         String ret = null;
@@ -90,6 +110,13 @@ public class Listener implements Runnable {
 //            System.out.println("KEEP ALIVE " + node.getPort());
             ret = "ALIVE";
         }
+
+        if(request.startsWith("FIND") || request.startsWith("TELL"))
+            System.out.println("Response : " + node.getPort() + " -> " + ret);
+
+        if(!request.startsWith("KEEP"))
+        logger.info("Response : " + node.getPort() + " -> " + ret);
+
         return ret;
     }
 
