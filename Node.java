@@ -1,6 +1,3 @@
-import lombok.Builder;
-
-import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
 
@@ -30,7 +27,7 @@ public class Node {
         this.socketAddress = socketAddress;
     }
 
-    public void setPredecessor(InetSocketAddress predecessor) {
+    public synchronized void setPredecessor(InetSocketAddress predecessor) {
         System.out.println("setting predecessor of " + this.port + ":" + ((predecessor==null)? " ":predecessor.getPort()));
         this.predecessor = predecessor;
     }
@@ -145,7 +142,7 @@ public class Node {
 
                 // remove it from finger table
                 else {
-                    fingerTable.deleteFingerEntry(fingerAddress);
+                    modifyFingerEntries(-2, fingerAddress);
                 }
             }
 
@@ -221,7 +218,7 @@ public class Node {
         return n;
     }
 
-    public String notifySuccessor(InetSocketAddress S) throws ClassNotFoundException {
+    public String notifySuccessor(InetSocketAddress S) {
         if (S != null && !S.equals(getSocketAddress())) {
             String port = String.valueOf(getPort());
             String request = "TELL-SUCCESSOR_" + port;
@@ -232,12 +229,20 @@ public class Node {
     }
 
 
-    public void handleNotification (InetSocketAddress newPredecessor) throws NoSuchAlgorithmException {
+    public void handleNotification (InetSocketAddress newPredecessor) throws NoSuchAlgorithmException, ClassNotFoundException {
         System.out.println("handle notification : " + getPort() + " -> " + (newPredecessor==null?" ":newPredecessor.getPort()));
-        if (getPredecessor() == null) {
+        if (getPredecessor() == null || getPredecessor().equals(newPredecessor)) {
             setPredecessor(newPredecessor);
         }
         else {
+
+            String response  = Auxiliary.sendRequest(getPredecessor(), "KEEP");
+            System.out.println("Response for check KEEP for " + getPredecessor() + "->" + response);
+            if (response == null || !response.equals("ALIVE")) {
+                setPredecessor(newPredecessor);
+                return;
+            }
+
             long oldPredecessor = Auxiliary.getHashAddress(getPredecessor());
             long oldPredecessorRelativeId = Auxiliary.getRelativeId(nodeId, oldPredecessor);
             long newPredecessorRelativeId = Auxiliary.getRelativeId(Auxiliary.getHashAddress(newPredecessor), oldPredecessor);
@@ -250,7 +255,7 @@ public class Node {
         }
     }
 
-    public void fillSuccessor() throws ClassNotFoundException {
+    public void fillSuccessor() {
         InetSocketAddress succ = getSuccessor();
         if (succ == null || succ.equals(socketAddress)) {
             for (int i = 2; i <= 32; i++) {
@@ -271,7 +276,7 @@ public class Node {
         }
     }
 
-    public void deleteSuccessor() throws ClassNotFoundException {
+    public void deleteSuccessor(){
 
         // Already null
         InetSocketAddress succ = getSuccessor();
@@ -329,12 +334,29 @@ public class Node {
         }
     }
 
-    public void updateFingerTable(int i, InetSocketAddress address) throws ClassNotFoundException {
+    public void updateFingerTable(int i, InetSocketAddress address){
         fingerTable.updateFingerEntry(i, address);
 
         if (i == 1 && address != null && !socketAddress.equals(address)) {
             notifySuccessor(address);
         }
     }
+
+    public synchronized void modifyFingerEntries(int position, InetSocketAddress address) {
+
+        if (position > 0 && position <= 32) {
+            updateFingerTable(position, address);
+        } else if (position == -1) {
+            deleteSuccessor();
+        } else if (position == -2) {
+            fingerTable.deleteFingerEntry(address);
+        } else if (position == -3) {
+            fillSuccessor();
+        } else {
+            System.out.println("Invalid option for modifyFingerEntries");
+        }
+
+    }
+
 
 }

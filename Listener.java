@@ -1,41 +1,35 @@
 import java.io.IOException;
-import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.security.NoSuchAlgorithmException;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
-public class Listener implements Runnable {
+public class Listener extends Thread{
 
     private Node node;
     private ServerSocket server;
-    private AtomicBoolean keepAlive;
-    private Thread worker;
+    private boolean keepAlive;
+
     Logger logger = Logger.getLogger("MyLog");
     FileHandler fh;
 
-    public void start() {
-        worker = new Thread(this);
-        worker.start();
-    }
 
-    public void stop() {
-        keepAlive.set(false);
+    public void stopThread() {
+        keepAlive = false;
     }
 
     public Listener(Node n) {
         node = n;
-        keepAlive = new AtomicBoolean(true);
+        keepAlive = true;
         try {
             server = new ServerSocket(node.getPort());
         } catch (IOException e) {
-            System.err.println("Could not listen on port " + node.getPort());
+            System.out.println("Could not listen on port " + node.getPort());
         }
 
         try {
@@ -121,7 +115,7 @@ public class Listener implements Runnable {
     @Override
     public void run()
     {
-        while(keepAlive.get()) {
+        while(keepAlive) {
 
             try {
                 Socket clientSocket = server.accept();
@@ -140,14 +134,10 @@ public class Listener implements Runnable {
                 clientSocket.close();
             } catch (IOException | ClassNotFoundException | NoSuchAlgorithmException e) {
                 e.printStackTrace();
-                System.err.println("Could not accept connection on port " + node.getPort());
+                System.out.println("Could not accept connection on port " + node.getPort());
+                throw new RuntimeException("Cannot accept connection request", e);
             }
 
-        }
-        try {
-            server.close();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 }

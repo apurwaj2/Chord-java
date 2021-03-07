@@ -24,7 +24,7 @@ public class FingerTable {
     public void deleteFingerEntry(InetSocketAddress address) {
         for (int i = 32; i > 0; i--) {
             InetSocketAddress fingerAddress = fingerTable.get(i);
-            if(fingerAddress.equals(address))
+            if(fingerAddress != null && fingerAddress.equals(address))
                 fingerTable.put(i, null);
         }
     }

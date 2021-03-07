@@ -1,12 +1,10 @@
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -63,7 +61,7 @@ public class Auxiliary {
         return c;
     }
 
-    public static String sendRequest(InetSocketAddress server, String request) throws ClassNotFoundException {
+    public static String sendRequest(InetSocketAddress server, String request){
 
         String response = null;
 
@@ -74,25 +72,36 @@ public class Auxiliary {
             oos = new ObjectOutputStream(socket.getOutputStream());
           //  System.out.println("Sending request to Socket Server");
             oos.writeObject(request);
+
+            try {
+                Thread.sleep(60);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
             //read the server response message
-            ois = new ObjectInputStream(socket.getInputStream());
-            response = (String) ois.readObject();
-          //  System.out.println("Response: " + response);
-            //close resources
-            ois.close();
+            try {
+//                input = talkSocket.getInputStream();
+                ois = new ObjectInputStream(socket.getInputStream());
+            } catch (IOException e) {
+                System.out.println("Cannot get input stream from "+server.toString()+"\nRequest is: "+ois+"\n");
+            }
+
+            if(ois != null) {
+                response = (String) ois.readObject();
+                ois.close();
+            }
+
             oos.close();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
 
         return response;
     }
 
-    public static InetSocketAddress requestAddress(InetSocketAddress server, String request) throws ClassNotFoundException {
+    public static InetSocketAddress requestAddress(InetSocketAddress server, String request) {
 
-      //
         //  System.out.println("Entered requestAddress");
         String response = null;
 

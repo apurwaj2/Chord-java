@@ -1,25 +1,35 @@
 import lombok.SneakyThrows;
 
-import java.math.BigInteger;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
-import static java.lang.Thread.sleep;
 
-public class Stabilize implements Runnable {
+public class Stabilize extends Thread {
 
     Node node;
     boolean keepAlive;
-    private Thread worker;
+    Logger logger;
+    FileHandler fh;
 
     Stabilize(Node n) {
         node = n;
         keepAlive = true;
-    }
+        try {
+            logger = Logger.getLogger("MyLog_" + node.getPort());
+            // This block configure the logger with handler and formatter
+            fh = new FileHandler("/home/apurwa/IdeaProjects/ImplementationChord/Stabilize.log");
+            logger.addHandler(fh);
+            SimpleFormatter formatter = new SimpleFormatter();
+            fh.setFormatter(formatter);
+            logger.setUseParentHandlers(false);
 
-    public void start() {
-        worker = new Thread(this);
-        worker.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void stopThread() {
@@ -29,33 +39,30 @@ public class Stabilize implements Runnable {
     @SneakyThrows
     public void run() {
         while (keepAlive) {
+            logger.info("Response : " + node.getPort());
             InetSocketAddress successor = node.getSuccessor();
+            logger.info("Getsuccessor for  " + node.getPort() + "->" + successor);
             if (successor == null || successor.equals(node.getSocketAddress())) {
-                node.fillSuccessor();
+                logger.info("Succesor is null for  " + node.getPort());
+                node.modifyFingerEntries(-3,null);
             }
-
 
             successor = node.getSuccessor();
             if (successor != null && !successor.equals(node.getSocketAddress())) {
 
                 // get predecessor
                 InetSocketAddress x = null;
-                try {
-                    x = Auxiliary.requestAddress(successor, "GET-PREDECESSOR");
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
+                x = Auxiliary.requestAddress(successor, "GET-PREDECESSOR");
+                logger.info("Getpredecessor for " +  node.getPort() + " successor  " + successor.getPort());
                 if (x == null) {
-                    try {
-                        node.deleteSuccessor();
-                    } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                    }
+                    logger.info("Deleting successor as x successor is null " + node.getPort());
+                    System.out.println("Successor deleted " + node.getPort());
+                    node.modifyFingerEntries(-1, null);
                 }
 
                 // else if successor's predecessor is not itself
                 else if (!x.equals(successor)) {
-//                    System.out.println("REached HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    logger.info("predecessor != successor for " +  node.getPort() + " successor  " + successor.getPort() + "->" + x.getPort());
                     long successorRelativeId = 0;
                     try {
                         successorRelativeId = Auxiliary.getRelativeId(Auxiliary.getHashAddress(successor), node.getNodeId());
@@ -74,16 +81,12 @@ public class Stabilize implements Runnable {
                 }
                 // successor's predecessor is successor itself, then notify successor
                 else {
-                    try {
-                        node.notifySuccessor(successor);
-                    } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                    }
+                    node.notifySuccessor(successor);
                 }
             }
 
             try {
-                sleep(240);
+                Thread.sleep(60);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
