@@ -28,7 +28,7 @@ public class CheckPredecessor extends Thread {
             try {
                 Thread.sleep(60);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             }
         }
     }

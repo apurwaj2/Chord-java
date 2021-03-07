@@ -28,7 +28,7 @@ public class Stabilize extends Thread {
             logger.setUseParentHandlers(false);
 
         } catch (IOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 
@@ -67,13 +67,13 @@ public class Stabilize extends Thread {
                     try {
                         successorRelativeId = Auxiliary.getRelativeId(Auxiliary.getHashAddress(successor), node.getNodeId());
                     } catch (NoSuchAlgorithmException e) {
-                        e.printStackTrace();
+                        //e.printStackTrace();
                     }
                     long xRelativeId = 0;
                     try {
                         xRelativeId = Auxiliary.getRelativeId(Auxiliary.getHashAddress(x), node.getNodeId());
                     } catch (NoSuchAlgorithmException e) {
-                        e.printStackTrace();
+                        //e.printStackTrace();
                     }
                     if (xRelativeId > 0 && xRelativeId < successorRelativeId) {
                         node.updateFingerTable(1, x);
@@ -88,7 +88,7 @@ public class Stabilize extends Thread {
             try {
                 Thread.sleep(60);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             }
         }
     }

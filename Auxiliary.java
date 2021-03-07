@@ -76,7 +76,7 @@ public class Auxiliary {
             try {
                 Thread.sleep(60);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                ////e.printStackTrace();
             }
 
             //read the server response message
@@ -94,7 +94,7 @@ public class Auxiliary {
 
             oos.close();
         } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
+           // ////e.printStackTrace();
         }
 
         return response;

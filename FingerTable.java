@@ -1,7 +1,9 @@
+import io.github.woodenbell.pprint.PrettyPrintable;
+
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 
-public class FingerTable {
+public class FingerTable implements PrettyPrintable {
 
     private HashMap<Integer, InetSocketAddress> fingerTable;
 
@@ -31,12 +33,44 @@ public class FingerTable {
 
     @Override
     public String toString() {
-        return "FingerTable{" +
-                "fingerTable=" + fingerTable +
-                '}';
+        return "" + fingerTable;
     }
 
     public int size() {
         return fingerTable.size();
+    }
+
+    @Override
+    public boolean ppIsRecursive() {
+        return false;
+    }
+
+    @Override
+    public boolean ppHasKeys() {
+        return true;
+    }
+
+    @Override
+    public Object[] ppGetKeys() {
+        Object[] k = new Object[fingerTable.size()];
+
+        int i = 0;
+        for (Integer key: fingerTable.keySet()) {
+            k[i] = key;
+            i++;
+        }
+        return k;
+    }
+
+    @Override
+    public Object[] ppGetValues() {
+        Object[] k = new Object[fingerTable.size()];
+
+        int i = 0;
+        for (Integer key: fingerTable.keySet()) {
+            k[i] = fingerTable.get(key);
+            i++;
+        }
+        return k;
     }
 }

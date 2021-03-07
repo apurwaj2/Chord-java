@@ -1,4 +1,9 @@
+import io.github.woodenbell.pprint.CollectionPrint;
+import io.github.woodenbell.pprint.ObjectPrint;
+import io.github.woodenbell.pprint.Util;
+
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
@@ -9,8 +14,8 @@ public class Main {
 
     public static void main (String[] args) throws NoSuchAlgorithmException, ClassNotFoundException {
 
-        String nodeIP = "localhost";
-        String option;
+        int mainPort = 0;
+        String option, str[];
 
         Scanner input = new Scanner(System.in);
 
@@ -18,44 +23,56 @@ public class Main {
 
             System.out.println();
             System.out.println("Enter anyone of the following options:");
-            System.out.println("create, join, delete, list, getkey, quit");
+            System.out.println("create <port>, join <port>, delete <port>, list, getkey <key> <port>, quit");
             System.out.println();
 
             option = input.nextLine();
             System.out.println("Entered option : " + option);
 
-            if (option.equals("create")) {
+            if (option.startsWith("create")) {
+                //to extract port number
+                str = option.split(" ");
 
-                //port number
-                System.out.println("Enter the port number for creating node:");
-                System.out.println();
+                if(str.length == 1) {
+                    System.out.println("Correct usage: create <port>");
+                    continue;
+                }
 
-                int port = input.nextInt();
+                int port = Integer.parseInt(str[1]);
+
                 if(Commands.create(port)) {
                     System.out.println("Chord ring created successfully");
                 } else {
                     System.out.println("Could not create chord ring");
                 }
 
-            } else if (option.equals("join")) {
+                mainPort = port;
+            } else if (option.startsWith("join")) {
 
-                System.out.println("Enter the port number for joining node:");
-                System.out.println();
-                int port1 = input.nextInt();
+                //to extract port number
+                str = option.split(" ");
 
-                System.out.println("Enter the port number of the node to join the ring:");
-                System.out.println();
-                int port2 = input.nextInt();
+                if(str.length == 1) {
+                    System.out.println("Correct usage: join <port>");
+                    continue;
+                }
 
-                Commands.create(port1);
-                Node n = masterLookup.get(port1);
-                Commands.join(n, port2);
+                int port = Integer.parseInt(str[1]);
 
-            } else if (option.equals("delete")) {
+                Commands.create(port);
+                Node n = masterLookup.get(port);
+                Commands.join(n, mainPort);
 
-                System.out.println("Enter the port number for deleting node:");
-                System.out.println();
-                int port = input.nextInt();
+            } else if (option.startsWith("delete")) {
+
+                //to extract port number
+                str = option.split(" ");
+                if(str.length == 1) {
+                    System.out.println("Correct usage: delete <port>");
+                    continue;
+                }
+                int port = Integer.parseInt(str[1]);
+
                 Commands.delete(port);
 
             } else if (option.equals("list")) {
@@ -63,20 +80,25 @@ public class Main {
                 System.out.println("Listing nodes");
                 for(Node node: Commands.list())
                 {
-                    System.out.println(node.getNodeId() + " : " + node.getPort());
-                    System.out.println("Predecessor: " + node.getPredecessor());
-                    System.out.println("Successor: " + node.getSuccessor());
-                    System.out.println("Finger Table: " + node.getFingerTable());
+                    ObjectPrint.pprint(node, true, true, Util.TableFormat.UNDERSCORE);
+//                    System.out.println(node.getNodeId() + " : " + node.getPort());
+//                    System.out.println("Predecessor: " + node.getPredecessor());
+//                    System.out.println("Successor: " + node.getSuccessor());
+//                    System.out.println("Finger Table: " + node.getFingerTable());
                 }
+//                CollectionPrint.pprint(Collections.singletonList(Commands.list()), true);
             }
-            else if (option.equals("getkey")) {
+            else if (option.startsWith("getkey")) {
 
-                System.out.println("Enter the port number to search key :");
-                System.out.println();
-                int port = input.nextInt();
-                System.out.println("Enter the key:");
-                System.out.println();
-                int key = input.nextInt();
+                //to extract port number
+                str = option.split(" ");
+                if(str.length < 2) {
+                    System.out.println("Correct usage: getkey <key> <port>");
+                    continue;
+                }
+                int key = Integer.parseInt(str[1]);
+                int port = Integer.parseInt(str[2]);
+
                 Commands.getKey(port, key);
 
             } else if (option.equals("quit")) {

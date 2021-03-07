@@ -21,6 +21,12 @@ public class Listener extends Thread{
 
     public void stopThread() {
         keepAlive = false;
+        try {
+            server.close();
+        } catch (IOException e) {
+            System.out.println("Server Socket closed " + node.getPort());
+           // //e.printStackTrace();
+        }
     }
 
     public Listener(Node n) {
@@ -42,7 +48,7 @@ public class Listener extends Thread{
             logger.setUseParentHandlers(false);
 
         } catch (IOException e) {
-            e.printStackTrace();
+            ////e.printStackTrace();
         }
     }
 
@@ -133,9 +139,8 @@ public class Listener extends Thread{
 
                 clientSocket.close();
             } catch (IOException | ClassNotFoundException | NoSuchAlgorithmException e) {
-                e.printStackTrace();
                 System.out.println("Could not accept connection on port " + node.getPort());
-                throw new RuntimeException("Cannot accept connection request", e);
+               // throw new RuntimeException("Cannot accept connection request", e);
             }
 
         }

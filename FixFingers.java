@@ -32,7 +32,7 @@ public class FixFingers extends Thread {
             logger.setUseParentHandlers(false);
 
         } catch (IOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 
@@ -48,7 +48,7 @@ public class FixFingers extends Thread {
             try {
                 fingerId = node.findSuccessor(Auxiliary.getFingerId(node.getNodeId(),randomNum,32));
             } catch (NoSuchAlgorithmException | ClassNotFoundException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             }
             node.updateFingerTable(randomNum, fingerId);
             logger.info("updating finger entry for " + node.getPort() + " at " + randomNum + " -> " + fingerId.getPort() );
@@ -56,7 +56,7 @@ public class FixFingers extends Thread {
             try {
                 Thread.sleep(200);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             }
         }
     }

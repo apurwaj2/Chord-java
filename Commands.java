@@ -67,7 +67,7 @@ public class Commands {
     public static void delete(int port) {
 
         Node node = Main.masterLookup.get(port);
-        node.getListener().stop();
+        node.getListener().stopThread();
         node.getCheckPredecessor().stopThread();
         node.getFixFingers().stopThread();
         node.getStabilize().stopThread();

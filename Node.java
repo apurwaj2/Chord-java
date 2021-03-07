@@ -1,8 +1,10 @@
+import io.github.woodenbell.pprint.PrettyPrintable;
+
 import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
 
 
-public class Node {
+public class Node implements PrettyPrintable {
     private long nodeId;
     private int port;
     private InetSocketAddress socketAddress;
@@ -359,4 +361,23 @@ public class Node {
     }
 
 
+    @Override
+    public boolean ppIsRecursive() {
+        return true;
+    }
+
+    @Override
+    public boolean ppHasKeys() {
+        return true;
+    }
+
+    @Override
+    public Object[] ppGetKeys() {
+        return new String[] {"Current Node","Successor", "Predecessor", "FingerTable"};
+    }
+
+    @Override
+    public Object[] ppGetValues() {
+        return new Object[] {getPort(), (getSuccessor() == null ? "NULL": getSuccessor().getPort()), (getPredecessor() == null ? "NULL": getPredecessor().getPort()), getFingerTable()};
+    }
 }
