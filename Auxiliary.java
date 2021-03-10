@@ -84,7 +84,7 @@ public class Auxiliary {
 //                input = talkSocket.getInputStream();
                 ois = new ObjectInputStream(socket.getInputStream());
             } catch (IOException e) {
-                System.out.println("Cannot get input stream from "+server.toString()+"\nRequest is: "+ois+"\n");
+               // System.out.println("Cannot get input stream from "+server.toString()+"\nRequest is: "+ois+"\n");
             }
 
             if(ois != null) {

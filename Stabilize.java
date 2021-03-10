@@ -56,7 +56,7 @@ public class Stabilize extends Thread {
                 logger.info("Getpredecessor for " +  node.getPort() + " successor  " + successor.getPort());
                 if (x == null) {
                     logger.info("Deleting successor as x successor is null " + node.getPort());
-                    System.out.println("Successor deleted " + node.getPort());
+                  //  System.out.println("Successor deleted " + node.getPort());
                     node.modifyFingerEntries(-1, null);
                 }
 

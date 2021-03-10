@@ -51,7 +51,7 @@ public class Commands {
         // Trying to join an existing ring
         InetSocketAddress address = new InetSocketAddress(portMain);
         String id = String.valueOf(node.getNodeId());
-        System.out.println("Join node hash id value is : " + id);
+     //   System.out.println("Join node hash id value is : " + id);
         String request = "FIND-SUCCESSOR_" + id;
         InetSocketAddress successor = Auxiliary.requestAddress(address, request);
         if(successor == null) {
@@ -83,14 +83,14 @@ public class Commands {
         long keyId = Auxiliary.getHashKey(key);
         String keyHash =  String.valueOf(keyId);
 
-        System.out.println("Hash value is : " + keyHash);
+      //  System.out.println("Hash value is : " + keyHash);
 
         String request = "FIND-SUCCESSOR_" + keyHash;
         InetSocketAddress result = Auxiliary.requestAddress(node.getSocketAddress(), request);
 
         // if fail to send request, local node is disconnected, exit
         if (result == null) {
-            System.out.println("Unable to contact node!");
+            System.out.println("Unable to contact node " + node.getPort());
             return;
         }
         // print out response

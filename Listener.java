@@ -56,7 +56,7 @@ public class Listener extends Thread{
         private String processRequest (String request) throws ClassNotFoundException, NoSuchAlgorithmException {
 
         if(request.startsWith("FIND") || request.startsWith("TELL"))
-        System.out.println("Processing the request at : " + node.getPort() + " -> " + request);
+      //  System.out.println("Processing the request at : " + node.getPort() + " -> " + request);
 
         if(!request.startsWith("KEEP"))
         logger.info("Processing the request at : " + node.getPort() + " -> " + request);
@@ -110,7 +110,7 @@ public class Listener extends Thread{
         }
 
         if(request.startsWith("FIND") || request.startsWith("TELL"))
-            System.out.println("Response : " + node.getPort() + " -> " + ret);
+          //  System.out.println("Response : " + node.getPort() + " -> " + ret);
 
         if(!request.startsWith("KEEP"))
         logger.info("Response : " + node.getPort() + " -> " + ret);
@@ -139,7 +139,7 @@ public class Listener extends Thread{
 
                 clientSocket.close();
             } catch (IOException | ClassNotFoundException | NoSuchAlgorithmException e) {
-                System.out.println("Could not accept connection on port " + node.getPort());
+                System.out.println("Stopped listening on port " + node.getPort());
                // throw new RuntimeException("Cannot accept connection request", e);
             }
 

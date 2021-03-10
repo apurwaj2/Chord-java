@@ -30,7 +30,7 @@ public class Node implements PrettyPrintable {
     }
 
     public synchronized void setPredecessor(InetSocketAddress predecessor) {
-        System.out.println("setting predecessor of " + this.port + ":" + ((predecessor==null)? " ":predecessor.getPort()));
+      //  System.out.println("setting predecessor of " + this.port + ":" + ((predecessor==null)? " ":predecessor.getPort()));
         this.predecessor = predecessor;
     }
 
@@ -232,14 +232,14 @@ public class Node implements PrettyPrintable {
 
 
     public void handleNotification (InetSocketAddress newPredecessor) throws NoSuchAlgorithmException, ClassNotFoundException {
-        System.out.println("handle notification : " + getPort() + " -> " + (newPredecessor==null?" ":newPredecessor.getPort()));
+     //   System.out.println("handle notification : " + getPort() + " -> " + (newPredecessor==null?" ":newPredecessor.getPort()));
         if (getPredecessor() == null || getPredecessor().equals(newPredecessor)) {
             setPredecessor(newPredecessor);
         }
         else {
 
             String response  = Auxiliary.sendRequest(getPredecessor(), "KEEP");
-            System.out.println("Response for check KEEP for " + getPredecessor() + "->" + response);
+        //    System.out.println("Response for check KEEP for " + getPredecessor() + "->" + response);
             if (response == null || !response.equals("ALIVE")) {
                 setPredecessor(newPredecessor);
                 return;
@@ -248,11 +248,11 @@ public class Node implements PrettyPrintable {
             long oldPredecessor = Auxiliary.getHashAddress(getPredecessor());
             long oldPredecessorRelativeId = Auxiliary.getRelativeId(nodeId, oldPredecessor);
             long newPredecessorRelativeId = Auxiliary.getRelativeId(Auxiliary.getHashAddress(newPredecessor), oldPredecessor);
-            System.out.println("newrelative " + newPredecessorRelativeId + " oldrelative " + oldPredecessorRelativeId);
+          //  System.out.println("newrelative " + newPredecessorRelativeId + " oldrelative " + oldPredecessorRelativeId);
             if (newPredecessorRelativeId > 0 && newPredecessorRelativeId < oldPredecessorRelativeId)
                 setPredecessor(newPredecessor);
             else {
-                System.out.println("Failed to set predecessor");
+               // System.out.println("Failed to set predecessor");
             }
         }
     }

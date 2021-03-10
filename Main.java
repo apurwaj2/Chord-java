@@ -92,7 +92,7 @@ public class Main {
 
                 //to extract port number
                 str = option.split(" ");
-                if(str.length < 2) {
+                if(str.length < 3) {
                     System.out.println("Correct usage: getkey <key> <port>");
                     continue;
                 }
