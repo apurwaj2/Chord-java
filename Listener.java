@@ -142,6 +142,12 @@ public class Listener extends Thread{
                // throw new RuntimeException("Cannot accept connection request", e);
             }
 
+            try {
+                Thread.sleep(60);
+            } catch (InterruptedException e) {
+                ////e.printStackTrace();
+            }
+
         }
     }
 }
