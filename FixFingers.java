@@ -5,7 +5,7 @@ import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 import java.util.logging.FileHandler;
-import java.util.logging.Logger;
+import java.util.logging.//logger;
 import java.util.logging.SimpleFormatter;
 
 
@@ -14,7 +14,7 @@ public class FixFingers extends Thread {
     Node node;
     Random random;
     boolean keepAlive;
-    Logger logger = Logger.getLogger("MyLog");
+    //logger //logger = //logger.get//logger("MyLog");
     FileHandler fh;
 
     FixFingers(Node n) {
@@ -22,18 +22,18 @@ public class FixFingers extends Thread {
         keepAlive = true;
         random = new Random();
 
-        try {
-
-            // This block configure the logger with handler and formatter
-            fh = new FileHandler("/home/apurwa/IdeaProjects/ImplementationChord/FixFingers.log");
-            logger.addHandler(fh);
-            SimpleFormatter formatter = new SimpleFormatter();
-            fh.setFormatter(formatter);
-            logger.setUseParentHandlers(false);
-
-        } catch (IOException e) {
-            //e.printStackTrace();
-        }
+//        try {
+//
+//            // This block configure the //logger with handler and formatter
+//            fh = new FileHandler("/home/apurwa/IdeaProjects/ImplementationChord/FixFingers.log");
+//            //logger.addHandler(fh);
+//            SimpleFormatter formatter = new SimpleFormatter();
+//            fh.setFormatter(formatter);
+//            //logger.setUseParentHandlers(false);
+//
+//        } catch (IOException e) {
+//            //e.printStackTrace();
+//        }
     }
 
     public void stopThread() {
@@ -51,7 +51,7 @@ public class FixFingers extends Thread {
                 //e.printStackTrace();
             }
             node.updateFingerTable(randomNum, fingerId);
-            logger.info("updating finger entry for " + node.getPort() + " at " + randomNum + " -> " + fingerId.getPort() );
+            //logger.info("updating finger entry for " + node.getPort() + " at " + randomNum + " -> " + fingerId.getPort() );
 
             try {
                 Thread.sleep(200);

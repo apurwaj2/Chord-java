@@ -6,7 +6,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.util.logging.FileHandler;
-import java.util.logging.Logger;
+import java.util.logging.//logger;
 import java.util.logging.SimpleFormatter;
 
 public class Listener extends Thread{
@@ -15,7 +15,7 @@ public class Listener extends Thread{
     private ServerSocket server;
     private boolean keepAlive;
 
-    Logger logger = Logger.getLogger("MyLog");
+    //logger //logger = //logger.get//logger("MyLog");
     FileHandler fh;
 
 
@@ -38,18 +38,18 @@ public class Listener extends Thread{
             System.out.println("Could not listen on port " + node.getPort());
         }
 
-        try {
-
-            // This block configure the logger with handler and formatter
-            fh = new FileHandler("/home/apurwa/IdeaProjects/ImplementationChord/MyLogFile.log");
-            logger.addHandler(fh);
-            SimpleFormatter formatter = new SimpleFormatter();
-            fh.setFormatter(formatter);
-            logger.setUseParentHandlers(false);
-
-        } catch (IOException e) {
-            ////e.printStackTrace();
-        }
+//        try {
+//
+//            // This block configure the //logger with handler and formatter
+//            fh = new FileHandler("/home/apurwa/IdeaProjects/ImplementationChord/MyLogFile.log");
+//            //logger.addHandler(fh);
+//            SimpleFormatter formatter = new SimpleFormatter();
+//            fh.setFormatter(formatter);
+//            //logger.setUseParentHandlers(false);
+//
+//        } catch (IOException e) {
+//            ////e.printStackTrace();
+//        }
     }
 
 
@@ -59,7 +59,7 @@ public class Listener extends Thread{
       //  System.out.println("Processing the request at : " + node.getPort() + " -> " + request);
 
         if(!request.startsWith("KEEP"))
-        logger.info("Processing the request at : " + node.getPort() + " -> " + request);
+        //logger.info("Processing the request at : " + node.getPort() + " -> " + request);
 
         InetSocketAddress result = null;
         String ret = null;
@@ -113,7 +113,7 @@ public class Listener extends Thread{
           //  System.out.println("Response : " + node.getPort() + " -> " + ret);
 
         if(!request.startsWith("KEEP"))
-        logger.info("Response : " + node.getPort() + " -> " + ret);
+        //logger.info("Response : " + node.getPort() + " -> " + ret);
 
         return ret;
     }
