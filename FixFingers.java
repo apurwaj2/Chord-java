@@ -5,7 +5,6 @@ import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 import java.util.logging.FileHandler;
-import java.util.logging.//logger;
 import java.util.logging.SimpleFormatter;
 
 

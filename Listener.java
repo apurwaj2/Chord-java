@@ -6,7 +6,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.util.logging.FileHandler;
-import java.util.logging.//logger;
 import java.util.logging.SimpleFormatter;
 
 public class Listener extends Thread{
@@ -55,10 +54,10 @@ public class Listener extends Thread{
 
         private String processRequest (String request) throws ClassNotFoundException, NoSuchAlgorithmException {
 
-        if(request.startsWith("FIND") || request.startsWith("TELL"))
+      //  if(request.startsWith("FIND") || request.startsWith("TELL"))
       //  System.out.println("Processing the request at : " + node.getPort() + " -> " + request);
 
-        if(!request.startsWith("KEEP"))
+       // if(!request.startsWith("KEEP"))
         //logger.info("Processing the request at : " + node.getPort() + " -> " + request);
 
         InetSocketAddress result = null;
@@ -109,10 +108,10 @@ public class Listener extends Thread{
             ret = "ALIVE";
         }
 
-        if(request.startsWith("FIND") || request.startsWith("TELL"))
+       // if(request.startsWith("FIND") || request.startsWith("TELL"))
           //  System.out.println("Response : " + node.getPort() + " -> " + ret);
 
-        if(!request.startsWith("KEEP"))
+      //  if(!request.startsWith("KEEP"))
         //logger.info("Response : " + node.getPort() + " -> " + ret);
 
         return ret;
